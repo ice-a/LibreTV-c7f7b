@@ -1,24 +1,49 @@
 {
-  "rewrites": [
+  "version": 2,
+  "builds": [
+    // 配置静态资源（HTML、CSS、JS、图片等）
     {
-      "source": "/proxy/:path*",
-      "destination": "/api/proxy/:path*"
+      "src": "*.html",
+      "use": "@vercel/static"
     },
     {
-      "source": "/s=:query",
-      "destination": "/index.html"
+      "src": "css/**/*",
+      "use": "@vercel/static"
     },
     {
-      "source": "/player.html",
-      "destination": "/player.html"
+      "src": "js/**/*",
+      "use": "@vercel/static"
     },
     {
-      "source": "/player.html/:path*",
-      "destination": "/player.html"
+      "src": "images/**/*",
+      "use": "@vercel/static"
     },
+    // 配置 Serverless 代理函数（proxy 目录下的接口）
     {
-      "source": "/:path*",
-      "destination": "/:path*"
+      "src": "proxy/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    // 所有静态资源请求直接返回文件
+    {
+      "src": "/(css|js|images)/.*",
+      "dest": "/$1/$2"
+    },
+    // 根路径指向 index.html（入口页面）
+    {
+      "src": "/",
+      "dest": "/index.html"
+    },
+    // 代理接口路由（匹配 /proxy/ 开头的请求，转发到 proxy/index.js）
+    {
+      "src": "/proxy/(.*)",
+      "dest": "/proxy/index.js"
+    },
+    // 其他路径均指向 index.html（适配单页应用路由）
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
